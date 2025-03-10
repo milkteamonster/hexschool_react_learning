@@ -33,7 +33,7 @@
 					<div id="root"></div>
 					<script type="text/babel">
 						const { useState, useEffect, useRef } = React;
-						let myModal;
+						//let myModal;//定義在外層是避免元件刷新導致mymodal不斷被刷新,或是放在useEffect當callbackfunction會有作用域的問題
 						const App = () => {
 						  // #2 使用 useRef
 						        // const btnRef = useRef(null);
@@ -42,19 +42,38 @@
 						        //       })
 
 						  // 3 操作 Bootstrap 改為使用 ref
+							const myModal = useRef(null); //☆改成useRef的方式來寫
+
 						        const modalRef = useRef(null); // 1.準備一個空盒子
-						              // 使用點擊按鈕來跳出 Modal
+
+						              // 使用點擊按鈕來跳出 Modal的部分
 						              const openModal = () => {
-						                      myModal.show();
+						                      myModal.current.show();
 						              }
 
-						              // 使用 useEffect 來初始化 Modal 一執行完畢就跳出 Modal
-
+						              // 使用 useEffect 來初始化 Modal 一執行完畢就跳出 Modal的部分
 						              useEffect(()=>{
-						                myModal = new bootstrap.Modal(modalRef.current);
-						                      myModal.show();
-						              },)
-						                    // 3.modalRef.current 就是那個div元素
+						                myModal.current = new bootstrap.Modal(modalRef.current); //☆加current是改成useRef的方式來寫
+						                myModal.current.show();
+						              },[])// 3.modalRef.current 就是那個div元素
+							// 4
+							// num + 1: 使用「記憶中的舊值」來計算
+							// (pre) => pre + 1: 使用「React 提供的最新值」來計算
+							const [num, setNum] = useState(1);
+							const num2 = useRef(1) //useRef傳參考的特性使得他並不會受到元件刷新的影響,num2.current可以一直記住上一次的值
+							//console.log(1);
+							console.log('num:', num, 'num2:', num2);
+													useEffect(()=>{
+														setInterval(() => {
+															//	setNum((pre) => pre + 1);  //這邊setNum(num + 1)會壞掉,因為setNum永遠認為num是1
+															num2.current = num2.current + 1;
+														}, 2000);
+													},[])
+
+
+							//＊＊＊＊＊總結：第二個 useEffect 設置了一個每 5 秒執行一次的計時器,當 setNum 更新狀態，組件就會重新渲染,導致第一個 useEffect 若沒有設定依賴數([])的話就會重複執行，因此每 5 秒都會創建並顯示一個新 Modal＊＊＊＊＊
+
+							//＊＊＊＊＊若把66行usestate部分註解起來,因為useRef不會受到元件刷新的影響,所以console畫面都不會再更新,像沒有setInterval一樣＊＊＊＊＊
 
 						  return (
 						    <>
