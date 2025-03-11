@@ -61,9 +61,8 @@
 						        // #3 加入滾動事件滾動到列表下方時取得一筆新的
 						        // #4
 
-						  useEffect(() => {
-						    (async () => {
-						      try {
+						            const getPhotos = async () =>{
+						                try {
 						        // 搜尋特定需要加入 query
 						        const result = await axios.get(`${api}?client_id=${accessKey}&query=${filterString}`);
 						        console.log(result);
@@ -71,7 +70,10 @@
 						      } catch (error) {
 						        console.log(error);
 						      }
-						    })();
+						              }
+
+						  useEffect(() => {
+						    getPhotos();
 						  }, [filterString])
 
 						  return (<div>
