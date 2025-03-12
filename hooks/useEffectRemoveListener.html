@@ -49,36 +49,54 @@
 						const App = () => {
 						  const [filterString, setFilterString] = useState('animal');
 						  const [jsonData, setJsonData] = useState([]);
+							const currentPage = useRef(1);
 						  const onSearchHandler = (e) => {
-						          if(e.key === 'Enter'){ //若key等於enter時才抓取資料
+						          if(e.key === 'Enter'){ //若key等於enter時才抓取資料  onChange改成onKeyPress, value改成defaultValue
 						            setFilterString(e.target.value);
 						          }
 						    //setFilterString(e.target.value);
 						  }
 
 						  // #1 搜尋會做調整 keyPress(Enter時才觸發)
-						        // #2 把getPhoto拉出,取得特定頁數
-						        // #3 加入滾動事件滾動到列表下方時取得一筆新的
-						        // #4
+							// #2 把getPhoto拉出,取得特定頁數
+							// #3 加入滾動事件,滾動到列表下方時取得一筆新的
+							// #4 加入移除監聽
 
-						            const getPhotos = async () =>{
-						                try {
-						        // 搜尋特定需要加入 query
-						        const result = await axios.get(`${api}?client_id=${accessKey}&query=${filterString}`);
-						        console.log(result);
-						        setJsonData(result.data.results);
-						      } catch (error) {
-						        console.log(error);
-						      }
-						              }
+							const getPhotos = async (page = 1) =>{
+								try {
+							// 搜尋特定需要加入 query
+							const result = await axios.get(`${api}?client_id=${accessKey}&query=${filterString}&page=${page}`);
+							console.log(result);
+							//setJsonData(result.data.results);//當前是不斷覆蓋,要改成累加
+							//setJsonData([...jsonData, ...result.data.results]);//累加
+							setJsonData((preData)=>{
+								return [...preData, ...result.data.results]
+							})
+						} catch (error) {
+							console.log(error);
+						}
+										}
+
+							const listRef = useRef(null); //list長度
 
 						  useEffect(() => {
 						    getPhotos();
+
+								//滾動監聽 要取得1.上方空間,2.list長度,3.視窗高度
+								window.addEventListener('scroll',()=>{
+									//console.log('loading', window.scrollY)
+									//console.dir(listRef.current);
+									const height = (listRef.current.offsetHeight + listRef.current.offsetTop) - window.innerHeight;//list長度+上方空間 - 視窗高度
+									if(window.scrollY > height){
+										currentPage.current ++ ;
+										getPhotos(currentPage.current);
+									}
+								} );
 						  }, [filterString])
 
 						  return (<div>
 						    <SearchBox onSearchHandler={onSearchHandler} filterString={filterString} />
-						    <div className='row row-cols-2 g-3'>
+						    <div className='row row-cols-2 g-3' ref={listRef}>
 						      { jsonData.map((item) =>
 						        <div className="col" key={item.id}>
 						          <Card item={item} />
