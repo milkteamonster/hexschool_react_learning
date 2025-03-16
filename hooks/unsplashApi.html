@@ -35,11 +35,16 @@
 							</div>
 						}
 
-						const Card = ({item}) => {
-						  return <div className="card">
+						const Card = ({item, getSinglePhoto}) => {
+						  return <a href="#" className="card" onClick={
+								(e)=>{
+									e.preventDefault();
+									getSinglePhoto(item.id);
+								}
+							}>
 						    <img className="card-img img-cover" width="100%" height="400"
 						    src={`${item.urls.raw}&w=600&q=80`} alt="" />
-						  </div>
+						  </a>
 						}
 
 						const SearchBox = ({onSearchHandler, filterString}) => {
@@ -53,22 +58,39 @@
 						}
 						// #1 從遠端取得剩餘次數並顯示在畫面上
 						// #2 讀取效果
+						//   - 製作畫面的圖取效果
+						//   - 套用狀態
 						// #3 取得單張照片並顯示在畫面上
-						// #4 製作畫面的圖取效果
-						// #5 套用狀態
+						//   - 打開modal（畫面）
+						//   - 重新發出請求
 
 						const App = () => {
 						  const [filterString, setFilterString] = useState('animal');
 						  const [jsonData, setJsonData] = useState([]);
 						  const [isLoading, setIsLoading] = useState(false);
 						  const [relatelimitRemaining, setRelatelimitRemaining] = useState(50);
+							const [photoUrl, setPhotoUrl] = useState('');
 						  const isLoadingRef = useRef(false)
 						  const currentPage = useRef(1);
+							//modal的變數定義⬇︎
+							const modalRef = useRef(null);
+							const myModal = useRef(null);
+							//modal的變數定義⬆︎
 						  const onSearchHandler = (e) => {
 						    if (e.key === 'Enter') {
 						      setFilterString(e.target.value);
 						    }
 						  }
+							const getSinglePhoto = async(id)=>{
+								const api = `https://api.unsplash.com/photos/`;
+								try {
+									const result = await axios(`${api}${id}?client_id=${accessKey}`);
+									setPhotoUrl(result.data.urls.regular);
+									myModal.current.show();
+								} catch (error) {
+									console.log(error);
+								}
+							}
 
 						  const getPhotos = async (page = 1, isNew = true) => {
 						    try {
@@ -119,6 +141,11 @@
 								body.style.overflow = isLoading ? 'hidden' : 'auto';
 							},[isLoading])
 
+							useEffect (()=>{
+								myModal.current = new bootstrap.Modal(modalRef.current);
+								//myModal.current.show();
+							},[])
+
 						  return (<div>
 								<Loading isLoading={isLoading}/>
 						    <SearchBox onSearchHandler={onSearchHandler} filterString={filterString} />
@@ -126,10 +153,16 @@
 						    <div className='row row-cols-2 g-3' ref={listRef}>
 						      { jsonData.map((item) =>
 						        <div className="col" key={item.id}>
-						          <Card item={item} />
+						          <Card item={item} getSinglePhoto={getSinglePhoto}/>
 						        </div>
 						      )}
 						    </div>
+								{/*這裡是modal的內容*/}
+								<div className="modal fade" ref={modalRef} id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+									<div className="modal-dialog">
+										<img src={photoUrl} alt="" width="100%" />
+									</div>
+								</div>
 						  </div>)
 						}
 
