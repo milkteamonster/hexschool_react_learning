@@ -27,8 +27,8 @@
 						const api = 'https://api.unsplash.com/search/photos/';
 						const accessKey = 'GAvxZ9VesndxTx_9NftqgOtZffnTB0YhfGiWGDJA-bs';
 
-						const Loading = () =>{
-							return <div className="loading">
+						const Loading = ({isLoading}) =>{
+							return <div className="loading" style={{display: isLoading ? 'flex' : 'none'}}>
 								<div className="spinner-border" role="status">
 									<span className="visually-hidden">Loading..</span>
 								</div>
@@ -60,9 +60,9 @@
 						const App = () => {
 						  const [filterString, setFilterString] = useState('animal');
 						  const [jsonData, setJsonData] = useState([]);
-						  // const [isLoading, setIsLoading] = useState(false);
+						  const [isLoading, setIsLoading] = useState(false);
 						  const [relatelimitRemaining, setRelatelimitRemaining] = useState(50);
-						  const isLoading = useRef(false)
+						  const isLoadingRef = useRef(false)
 						  const currentPage = useRef(1);
 						  const onSearchHandler = (e) => {
 						    if (e.key === 'Enter') {
@@ -73,7 +73,8 @@
 						  const getPhotos = async (page = 1, isNew = true) => {
 						    try {
 						        // 搜尋特定需要加入 query
-						        isLoading.current = true;
+						        isLoadingRef.current = true;
+										setIsLoading(true);
 						        const result = await axios.get(`${api}?client_id=${accessKey}&query=${filterString}&page=${page}`);
 						        console.log(result); //result 是 Axios 發送 HTTP 請求後回傳的響應物件,x-ratelimit-remaining這個就是在result裡面
 						        setJsonData((preData) => {
@@ -86,7 +87,8 @@
 						        setRelatelimitRemaining(result.headers['x-ratelimit-remaining']);//直接傳入 API 回傳的值,這裡要抓它不能用.因為他中間有-所以要用[]來取
 						        currentPage.current = page; // 每次都需要確認當前頁
 						        setTimeout(() => {
-						          isLoading.current = false;
+						          isLoadingRef.current = false;
+											setIsLoading(false);
 						        }, 500);
 						      } catch (error) {
 						        console.log(error);
@@ -100,7 +102,7 @@
 						    const scrollEvent = () => {
 						      console.log('scroll', window.scrollY); // 垂直滾動的位置
 						      const height = (listRef.current.offsetHeight + listRef.current.offsetTop) - window.innerHeight;
-						      if (!isLoading.current && window.scrollY > height) { // 需要滾動到下方，並沒有在讀取中
+						      if (!isLoadingRef.current && window.scrollY > height) { // 需要滾動到下方，並沒有在讀取中
 						        currentPage.current ++;
 						        getPhotos(currentPage.current, false); // 應該是頁數增加 1
 						      }
@@ -111,8 +113,14 @@
 						    return () => window.removeEventListener('scroll', scrollEvent);
 						  }, [filterString]);
 
+							//讓loading時有畫面凍結的效果。當isLoading改變時，改變body的overflow
+							useEffect(()=>{
+								const body = document.querySelector('body');
+								body.style.overflow = isLoading ? 'hidden' : 'auto';
+							},[isLoading])
+
 						  return (<div>
-								<Loading />
+								<Loading isLoading={isLoading}/>
 						    <SearchBox onSearchHandler={onSearchHandler} filterString={filterString} />
 						    <p>剩餘請求次數{relatelimitRemaining}</p>
 						    <div className='row row-cols-2 g-3' ref={listRef}>
@@ -141,7 +149,8 @@
 							background-color: rgba(255, 255, 255, 0.5);
 							backdrop-filter: blur(2px);
 							z-index: 9999;
-							display: flex;
+							/* display: flex; */
+							display: none;
 							justify-content: center;
 							align-items: center;
 						}
