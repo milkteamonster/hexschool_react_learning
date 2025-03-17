@@ -28,17 +28,15 @@
 						const App = () => {
 						  // #2 定義狀態
 						  //let num = 0;
-
+							const [ num, setNum ] = useState(0);
 						        //前者是變數，後者是方法，useState()裡面是預設值
-						        const [ num, setNum ] = useState(0);
 						  return (<div>
-
-						    <button type="button" onClick={() => {
-						            setNum(num + 1)
-						      //num++;
-						            console.log(num)
-						    }}>{num}</button>
-						    {/* 使用 set 將值寫入 */}
+								<p>點擊了{num}次</p>
+								<button type="button" onClick={()=>{
+									// 這裡寫num++是不行的，因為React不會去重新渲染
+									setNum(num + 1);
+									console.log(num);
+								}}>{num}</button>
 						    </div>)
 						}
 
