@@ -20,15 +20,38 @@
 						<small>檔名：<code>inputUseState.html</code></small>
 					</div>
 					<!-- 🔥🔥練習開始🔥🔥 -->
-					<input type="text" id="input" />
+
+					<!-- 原生change事件 -->
+					<span>原生的範例框:</span>
+					<input type="text" id="input" disabled />
 
 					<script>
-						// change事件是在滑鼠離開時才會觸發
+						// 原生的change事件是在滑鼠離開時(在框外點擊時)才會觸發
 						const input = document.querySelector('#input')
+						input.addEventListener('change', (e)=>{
+						  console.log(e.target.value)
+						})
+						// 原生的keyup事件是輸入什麼就會反映什麼
 						input.addEventListener('keyup', (e)=>{
 						  console.log(e.target.value)
 						})
 					</script>
+
+					<!-- 結論
+					React 的 onChange 事件行為比較接近原生的 keyup 事件：
+
+					即時性：
+					使用者輸入時立即觸發
+					不需要等待失去焦點
+
+					觸發時機：
+					每次輸入值改變就會觸發
+					包含貼上、刪除等操作
+
+					使用場景：
+					適合即時更新 UI
+					適合即時表單驗證
+					適合即時搜尋功能 -->
 
 					<div id="root"></div>
 					<script type="text/babel">
@@ -38,6 +61,8 @@
 						  //const text = useState('這是一段文字')
 
 						  return (<div>
+								<span>React的範例框: </span>
+								{text}
 						    <input type="text" value={text} onChange={(e)=>{
 						            console.log(e.target.value)
 						            setText(e.target.value)}}/>
