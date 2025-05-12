@@ -76,23 +76,26 @@
 
 						            const Card = ({title, price, content, callToAction}) =>{
 						                  //為什麼console.log(products)不行，看title,price,...等等卻可以？
-						                    //console.log(title, price, content, callToAction);
+						                    console.log(title, price, content, callToAction);
 						                    return (
 						                      <div className="card mb-4">
 						                            <div className="card-header"><h4 className="my-0">{title}</h4></div>
 						                            <div className="card-body">
-						                              <h1 className="card-title">{typeof price === 'number' ? <>${price}<small>月</small></> : price}</h1>
+						                              <h1 className="card-title">{typeof price === 'number' ?
+																						<>${price}<small>月</small></> : price}</h1>
 
 						                              <p>{content}</p>
 																					{title === '企業版' ?
-																						<PrimaryButton className="btn-primary"><small><i className="bi bi-gem"></i>{callToAction}</small></PrimaryButton> : <PrimaryButton className='btn-outline-primary'>{callToAction}</PrimaryButton>}
+																						<PrimaryButton className="btn-primary"><small><i className="bi bi-gem"></i>{callToAction}</small></PrimaryButton>
+																						:
+																						<PrimaryButton className='btn-outline-primary'>{callToAction}</PrimaryButton>}
 						                            {/*<button type="button" className="btn btn-outline-primary">{callToAction}</button>*/}
 						                            </div>
 						                          </div>
 						                    )
 						                  }
 						                        const PrimaryButton = ({className, children}) =>{
-						                          console.log(children);
+																			//console.log(children);
 						                          return (
 						                            <button type="button" className={`btn ${className}`}>{children}</button>
 						                          )
